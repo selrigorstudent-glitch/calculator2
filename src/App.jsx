@@ -5,69 +5,86 @@ function App() {
   const [display, setDisplay] = useState("0");
   const [firstNumber, setFirstNumber] = useState(null);
   const [operator, setOperator] = useState(null);
-  const [waitingForSecondNumber, setWaitingForSecondNumber] = useState(false);
+  const [waitingForNumber, setWaitingForNumber] = useState(false);
 
   const inputNumber = (number) => {
-    if (waitingForSecondNumber) {
+    if (waitingForNumber) {
       setDisplay(number);
-      setWaitingForSecondNumber(false);
+      setWaitingForNumber(false);
     } else {
       setDisplay(display === "0" ? number : display + number);
     }
   };
 
   const chooseOperator = (nextOperator) => {
-    const inputValue = parseFloat(display);
+    const number = parseFloat(display);
 
-    if (operator && waitingForSecondNumber) {
-      setOperator(nextOperator);
-      return;
-    }
+    if (isNaN(number)) return;
 
-    if (firstNumber === null) {
-      setFirstNumber(inputValue);
-    } else if (operator) {
-      const result = calculate(firstNumber, inputValue, operator);
-      setDisplay(String(result));
-      setFirstNumber(result);
-    }
-
-    setWaitingForSecondNumber(true);
+    setFirstNumber(number);
     setOperator(nextOperator);
-  };
 
-  const calculate = (first, second, operation) => {
-    switch (operation) {
-      case "+":
-        return first + second;
-      case "-":
-        return first - second;
-      case "*":
-        return first * second;
-      case "/":
-        return second === 0 ? "Error" : first / second;
-      default:
-        return second;
-    }
+    const symbol =
+      nextOperator === "*"
+        ? "×"
+        : nextOperator === "/"
+        ? "÷"
+        : nextOperator === "-"
+        ? "−"
+        : "+";
+
+    setDisplay(symbol);
+    setWaitingForNumber(true);
   };
 
   const handleEquals = () => {
-    if (operator === null || firstNumber === null) return;
+    if (firstNumber === null || operator === null) return;
 
     const secondNumber = parseFloat(display);
-    const result = calculate(firstNumber, secondNumber, operator);
+
+    if (isNaN(secondNumber)) return;
+
+    let result;
+
+    switch (operator) {
+      case "+":
+        result = firstNumber + secondNumber;
+        break;
+
+      case "-":
+        result = firstNumber - secondNumber;
+        break;
+
+      case "*":
+        result = firstNumber * secondNumber;
+        break;
+
+      case "/":
+        result = secondNumber === 0 ? "Error" : firstNumber / secondNumber;
+        break;
+
+      default:
+        result = secondNumber;
+    }
 
     setDisplay(String(result));
     setFirstNumber(null);
     setOperator(null);
-    setWaitingForSecondNumber(false);
+    setWaitingForNumber(false);
   };
 
   const clearCalculator = () => {
     setDisplay("0");
     setFirstNumber(null);
     setOperator(null);
-    setWaitingForSecondNumber(false);
+    setWaitingForNumber(false);
+  };
+
+  const showName = () => {
+    setDisplay("Sean Eric L. Rigor");
+    setFirstNumber(null);
+    setOperator(null);
+    setWaitingForNumber(false);
   };
 
   return (
@@ -114,11 +131,12 @@ function App() {
           <button onClick={() => inputNumber("2")}>2</button>
           <button onClick={() => inputNumber("3")}>3</button>
 
-          <button
-            className="zero"
-            onClick={() => inputNumber("0")}
-          >
+          <button className="zero" onClick={() => inputNumber("0")}>
             0
+          </button>
+
+          <button className="name-button" onClick={showName}>
+            Rigor Sean
           </button>
         </div>
       </div>
